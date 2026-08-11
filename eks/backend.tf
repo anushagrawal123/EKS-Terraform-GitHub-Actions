@@ -9,11 +9,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "anush-devops-tfstate-12345"
-    region         = "us-east-1"
-    key            = "eks/terraform.tfstate"
-    dynamodb_table = "Lock-Files"
-    encrypt        = true
+    bucket  = "anush-devops-tfstate-12345"
+    key     = "eks/terraform.tfstate"
+    region  = "us-east-1"
+    encrypt = true
   }
 }
 
