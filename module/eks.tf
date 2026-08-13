@@ -12,9 +12,8 @@ resource "aws_eks_cluster" "eks" {
     security_group_ids      = [aws_security_group.eks-cluster-sg.id]
   }
 
-
   access_config {
-    authentication_mode                         = "CONFIG_MAP"
+    authentication_mode                         = "API_AND_CONFIG_MAP"
     bootstrap_cluster_creator_admin_permissions = true
   }
 
@@ -30,7 +29,6 @@ resource "aws_iam_openid_connect_provider" "eks-oidc" {
   thumbprint_list = [data.tls_certificate.eks-certificate.certificates[0].sha1_fingerprint]
   url             = data.tls_certificate.eks-certificate.url
 }
-
 
 # AddOns for EKS Cluster
 resource "aws_eks_addon" "eks-addons" {
@@ -58,10 +56,15 @@ resource "aws_eks_node_group" "ondemand-node" {
     max_size     = var.max_capacity_on_demand
   }
 
-  subnet_ids = [aws_subnet.private-subnet[0].id, aws_subnet.private-subnet[1].id, aws_subnet.private-subnet[2].id]
+  subnet_ids = [
+    aws_subnet.private-subnet[0].id,
+    aws_subnet.private-subnet[1].id,
+    aws_subnet.private-subnet[2].id
+  ]
 
   instance_types = var.ondemand_instance_types
   capacity_type  = "ON_DEMAND"
+
   labels = {
     type = "ondemand"
   }
@@ -69,9 +72,11 @@ resource "aws_eks_node_group" "ondemand-node" {
   update_config {
     max_unavailable = 1
   }
+
   tags = {
     "Name" = "${var.cluster-name}-ondemand-nodes"
   }
+
   tags_all = {
     "kubernetes.io/cluster/${var.cluster-name}" = "owned"
     "Name" = "${var.cluster-name}-ondemand-nodes"
@@ -92,7 +97,11 @@ resource "aws_eks_node_group" "spot-node" {
     max_size     = var.max_capacity_spot
   }
 
-  subnet_ids = [aws_subnet.private-subnet[0].id, aws_subnet.private-subnet[1].id, aws_subnet.private-subnet[2].id]
+  subnet_ids = [
+    aws_subnet.private-subnet[0].id,
+    aws_subnet.private-subnet[1].id,
+    aws_subnet.private-subnet[2].id
+  ]
 
   instance_types = var.spot_instance_types
   capacity_type  = "SPOT"
@@ -100,17 +109,21 @@ resource "aws_eks_node_group" "spot-node" {
   update_config {
     max_unavailable = 1
   }
+
   tags = {
     "Name" = "${var.cluster-name}-spot-nodes"
   }
+
   tags_all = {
     "kubernetes.io/cluster/${var.cluster-name}" = "owned"
     "Name" = "${var.cluster-name}-ondemand-nodes"
   }
+
   labels = {
     type      = "spot"
     lifecycle = "spot"
   }
+
   disk_size = 50
 
   depends_on = [aws_eks_cluster.eks]
