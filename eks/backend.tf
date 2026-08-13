@@ -9,7 +9,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket  = "anush-devops-tfstate-12345"
+    bucket  = "anush-devops-tfstate-123456"
     key     = "eks/terraform.tfstate"
     region  = "us-east-1"
     encrypt = true
